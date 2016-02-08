@@ -9,6 +9,10 @@ import ConfigParser
 
 # Variables ===================================================================
 # Functions & classes =========================================================
+def collect_files(path):
+    pass
+
+
 def get_user_pass(path):
     config = ConfigParser.ConfigParser()
     config.read(path)
