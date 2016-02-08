@@ -8,7 +8,7 @@ import os.path
 
 import pytest
 
-import resolver_backupper
+import owncloud_backup
 
 
 # Variables ===================================================================
@@ -28,4 +28,4 @@ def data_context(fn):
 
 # Tests =======================================================================
 def test_collect_files(data_path):
-    resolver_backupper.collect_files(data_path)
+    owncloud_backup.collect_files(data_path)
