@@ -38,13 +38,21 @@ def collect_files(path):
 
 
 def pick_n(dataset, n):
+    """
+    Pick `n` items from `dataset`. The function tries to divide the items into
+    same-sized groups and then picks first item from each of the group.
+
+    Args:
+        dataset (list): Array of items.
+        n (int): How many items to pick from `dataset`.
+
+    Returns:
+        list: Picked items.
+    """
     if len(dataset) == 1:
         return [dataset[0]]
 
-    if n >= len(dataset):
-        return dataset
-
-    if n == 1:
+    if n == 1 or n >= len(dataset):
         return dataset
 
     elif n == 2:
