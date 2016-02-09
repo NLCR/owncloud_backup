@@ -34,9 +34,32 @@ def collect_files(path):
     ]
 
 
-def divide_files(file_list):
-    today = time.time()
-    month = 60*60 * 24 * 31
+def pick_n(dataset, n):
+    if len(dataset) == 1:
+        return [dataset[0]]
+
+    if n >= len(dataset):
+        return dataset
+
+    if n == 1:
+        return dataset
+
+    elif n == 2:
+        return [dataset[0], dataset[len(dataset) / 2]]
+
+    elif n == 3:
+        return [dataset[0], dataset[len(dataset) / 2], dataset[-1]]
+
+    else:
+        return pick_n(dataset[:len(dataset) / 2], n - 2) + \
+               pick_n(dataset[len(dataset) / 2:], n - 2)
+
+
+def divide_files(file_list, today=None):
+    if not today:
+        today = time.time()
+
+    month = 60 * 60 * 24 * 31
     next_month = today + month
 
     def two_months_before(file_list):
@@ -56,6 +79,8 @@ def divide_files(file_list):
     file_list = sorted(file_list, key=lambda x: x.timestamp)
     two_months = two_months_before(file_list)
     three_months = three_months_or_older(file_list)
+
+
 
 
 def get_user_pass(path):
