@@ -118,6 +118,20 @@ def collect_old_files(file_list, today=None):
     return old_files
 
 
+def exists(client, path):
+    path = os.path.abspath(path)
+
+    dirname = os.path.dirname(path)
+    filename = os.path.basename(path)
+
+    listing = client.list(dirname)
+
+    return filename in {
+        os.path.basename(os.path.abspath(x.path))
+        for x in listing
+    }
+
+
 # Main program ================================================================
 if __name__ == '__main__':
     config = ConfigParser.SafeConfigParser()
@@ -125,19 +139,22 @@ if __name__ == '__main__':
         'owncloud_backup.cfg',
         os.path.expanduser('~/.owncloud_backup.cfg'),
     ])
-    if not config.has_section("Conf"):
-        config.add_section("Conf")
-        config.set('Conf', 'suffix', '.gz')
-        config.set('Conf', 'remote_path', 'backups')
+    if not config.has_section("Config"):
+        config.add_section("Config")
+    if not config.has_option("Config", "suffix"):
+        config.set('Config', 'suffix', '.gz')
+    if not config.has_option("Config", "remote_path"):
+        config.set('Config', 'remote_path', 'backups')
 
     pwd = config.get("Login", "pass")
     user = config.get("Login", "user")
-    suffix = config.get("Conf", "suffix")
-    remote_path = config.get("Conf", "remote_path")
+    suffix = config.get("Config", "suffix")
+    remote_path = config.get("Config", "remote_path")
 
     client = owncloud.Client("https://owncloud.cesnet.cz")
     client.login(user, pwd)
 
+    # check whether the user was really logged in
     try:
         client.list("/")
     except owncloud.ResponseError as e:
@@ -148,9 +165,18 @@ if __name__ == '__main__':
         print >>sys.stderr, e.message
         sys.exit(1)
 
-    make_backup()
-    all_files = collect_files(remote_path)
-    old_files = collect_old_files(all_files)
+    # try to create `remote_path` directory
+    if not exists(client, remote_path):
+        if not client.mkdir(remote_path):
+            print >>sys.stderr, (
+                "Can't create `%s`. Please create the directory and repeat."
+                % remote_path
+            )
+            sys.exit(1)
 
-    for file in old_files:
-        pass  #: Todo: unlink
+    # make_backup()
+    # all_files = collect_files(remote_path)
+    # old_files = collect_old_files(all_files)
+
+    # for file in old_files:
+    #     pass  #: Todo: unlink
