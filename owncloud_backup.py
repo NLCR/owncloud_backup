@@ -5,6 +5,7 @@
 #
 # Imports =====================================================================
 import os
+import sys
 import time
 import datetime
 import ConfigParser
@@ -107,16 +108,17 @@ def collect_old_files(file_list, today=None):
     return old_files
 
 
-def get_user_pass(path):
-    config = ConfigParser.ConfigParser()
-    config.read(path)
+# Main program ================================================================
+if __name__ == '__main__':
+    config = ConfigParser.SafeConfigParser()
+    config.read([
+        'owncloud_backup.cfg',
+        os.path.expanduser('~/.owncloud_backup.cfg'),
+    ])
+    if not config.has_section("Conf"):
+        config.add_section("Conf")
+        config.set('Conf', 'suffix', '.gz')
 
     user = config.get("Login", "user")
     pwd = config.get("Login", "pass")
-
-    return user, pwd
-
-
-# Main program ================================================================
-if __name__ == '__main__':
-    print get_user_pass("login.cfg")
+    suffix = config.get("Conf", "suffix")
