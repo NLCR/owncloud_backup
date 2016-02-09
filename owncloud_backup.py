@@ -11,6 +11,8 @@ import datetime
 import ConfigParser
 from collections import namedtuple
 
+import owncloud
+
 
 # Variables ===================================================================
 # Functions & classes =========================================================
@@ -118,7 +120,29 @@ if __name__ == '__main__':
     if not config.has_section("Conf"):
         config.add_section("Conf")
         config.set('Conf', 'suffix', '.gz')
+        config.set('Conf', 'remote_path', 'backups')
 
-    user = config.get("Login", "user")
     pwd = config.get("Login", "pass")
+    user = config.get("Login", "user")
     suffix = config.get("Conf", "suffix")
+    remote_path = config.get("Conf", "remote_path")
+
+    client = owncloud.Client("https://owncloud.cesnet.cz")
+    client.login(user, pwd)
+
+    try:
+        client.list("/")
+    except owncloud.ResponseError as e:
+        if e.status_code == 401:
+            print >>sys.stderr, "Invalid username/password."
+            sys.exit(1)
+
+        print >>sys.stderr, e.message
+        sys.exit(1)
+
+    make_backup()
+    all_files = collect_files(remote_path)
+    old_files = collect_old_files(all_files)
+
+    for file in old_files:
+        pass  #: Todo: unlink
