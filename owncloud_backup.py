@@ -107,30 +107,30 @@ def collect_old_files(file_list, today=None):
         today = time.time()
 
     month = 60 * 60 * 24 * 31
-    next_month = today + month
-    next_two_months = next_month + month
-    next_three_months = next_two_months + month
+    prev_month = today - month
+    prev_two_months = prev_month - month
+    prev_three_months = prev_two_months - month
 
     def two_months_before(file_list):
         return [
             fo
             for fo in file_list
-            if fo.timestamp > next_month and fo.timestamp <= next_two_months
+            if fo.timestamp < prev_month and fo.timestamp >= prev_two_months
         ]
 
     def three_months_before(file_list):
         return [
             fo
             for fo in file_list
-            if (fo.timestamp > next_two_months and
-                fo.timestamp <= next_three_months)
+            if (fo.timestamp < prev_two_months and
+                fo.timestamp >= prev_three_months)
         ]
 
     def older_than_three_months(file_list):
         return [
             fo
             for fo in file_list
-            if fo.timestamp > next_three_months
+            if fo.timestamp < prev_three_months
         ]
 
     # sort the list - this is important for other pickers
@@ -151,7 +151,7 @@ def collect_old_files(file_list, today=None):
     old_files.extend([fo for fo in two_months if fo not in keep_twomonths])
     old_files.extend([fo for fo in three_months if fo not in keep_threemonths])
 
-    return old_files
+    return sorted(old_files, key=lambda x: x.timestamp)
 
 
 def exists(client, path):
