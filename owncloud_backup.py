@@ -135,7 +135,11 @@ def exists(client, path):
 
 def upload_file(remote_path, path, add_date_string=True):
     if add_date_string:
-        path = time.strftime("%Y.%m.%d_") + path
+        filename = os.path.basename(os.path.abspath(path))
+        remote_path = os.path.join(
+            remote_path,
+            time.strftime("%Y.%m.%d_") + filename,
+        )
 
     return client.put_file(remote_path, path)
 
@@ -228,12 +232,13 @@ if __name__ == "__main__":
             )
             sys.exit(1)
 
-    if not os.path.exists(args.FILENAME):
-        print >>sys.stderr, "`%s` doesn't exists!" % args.FILENAME
+    filename = args.FILENAME[0]
+    if not os.path.exists(filename):
+        print >>sys.stderr, "`%s` doesn't exists!" % filename
         sys.exit(1)
 
-    if not upload_file(remote_path, args.FILENAME, not args.no_ts):
-        print >>sys.stderr, "Couln't upload `%s`, sorry." % args.FILENAME
+    if not upload_file(remote_path, filename, not args.no_ts):
+        print >>sys.stderr, "Couln't upload `%s`, sorry." % filename
         sys.exit(1)
 
     all_files = collect_files(remote_path, config.get("Config", "suffix"))
