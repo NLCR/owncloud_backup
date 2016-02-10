@@ -133,6 +133,13 @@ def exists(client, path):
     }
 
 
+def upload_file(remote_path, path, add_date_string=True):
+    if add_date_string:
+        path = time.strftime("%Y.%m.%d_") + path
+
+    return client.put_file(remote_path, path)
+
+
 def get_config(args):
     config = ConfigParser.SafeConfigParser()
     config.read([
@@ -163,7 +170,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description="""This program may be used to perform database backups
-        into ownCloud."""
+            into ownCloud."""
     )
     parser.add_argument(
         "-u",
@@ -179,6 +186,14 @@ if __name__ == "__main__":
         "--url",
         default=default_url,
         help="URL of the ownCloud service. Default %s."
+    )
+    parser.add_argument(
+        "-n",
+        "--no-timestamp",
+        dest="no_ts",
+        action="store_true",
+        help="""By default, the script adds `%Y.%m.%d_` prefix to each \
+            uploaded file."""
     )
     parser.add_argument(
         "FILENAME",
@@ -217,7 +232,7 @@ if __name__ == "__main__":
         print >>sys.stderr, "`%s` doesn't exists!" % args.FILENAME
         sys.exit(1)
 
-    if not client.put_file(remote_path, args.FILENAME):
+    if not upload_file(remote_path, args.FILENAME, not args.no_ts):
         print >>sys.stderr, "Couln't upload `%s`, sorry." % args.FILENAME
         sys.exit(1)
 
