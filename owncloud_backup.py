@@ -185,14 +185,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--url",
         default=default_url,
-        help="URL of the ownCloud service. Default %s."
+        help="URL of the ownCloud service. Default `%s`." % default_url
     )
     parser.add_argument(
         "-n",
         "--no-timestamp",
         dest="no_ts",
         action="store_true",
-        help="""By default, the script adds `%Y.%m.%d_` prefix to each \
+        help="""By default, the script adds `%%Y.%%m.%%d_` prefix to each \
             uploaded file."""
     )
     parser.add_argument(
