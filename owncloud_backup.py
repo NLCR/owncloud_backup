@@ -15,26 +15,26 @@ from collections import namedtuple
 import owncloud
 
 
-# Variables ===================================================================
 # Functions & classes =========================================================
 FileObj = namedtuple("FileObj", "timestamp filename")
 
 
-def collect_files(path, suffix):
-    def file_list(path):
-        for fn in os.listdir(path):
-            if path.endiswith(suffix):
-                yield fn
-
+def collect_files(path, suffix, listdir):
     def parse_ts(fn):
-        date_string = fn.split("_")[-1].split(suffix)[0]
-        date = datetime.datetime.strptime(date_string, "%Y.%m.%d").timetuple()
+        date_string = fn.split("_")[0]
+
+        try:
+            date = datetime.datetime.strptime(date_string, "%Y.%m.%d")
+            date = date.timetuple()
+        except ValueError:
+            return None
 
         return time.mktime(date)
 
     return [
-        FileObj(timestamp=parse_ts, filename=fn)
-        for fn in file_list(path)
+        FileObj(timestamp=parse_ts(fn), filename=fn)
+        for fn in listdir(path)
+        if "_" in fn and parse_ts(fn) is not None
     ]
 
 
@@ -241,7 +241,14 @@ if __name__ == "__main__":
         print >>sys.stderr, "Couln't upload `%s`, sorry." % filename
         sys.exit(1)
 
-    all_files = collect_files(remote_path, config.get("Config", "suffix"))
+    all_files = collect_files(
+        remote_path,
+        suffix=config.get("Config", "suffix"),
+        listdir=lambda path: [
+            os.path.basename(os.path.abspath(x.path))
+            for x in client.list(path)
+        ],
+    )
     old_files = collect_old_files(all_files)
 
     for file in old_files:
