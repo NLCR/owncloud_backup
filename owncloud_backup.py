@@ -19,8 +19,32 @@ import owncloud
 FileObj = namedtuple("FileObj", "timestamp filename")
 
 
-def collect_files(path, suffix, listdir):
+def collect_files(path, listdir):
+    """
+    Collect all files in `path` using `listdir` function.
+
+    This function collects only files with `%%Y.%%m.%%d` prefix, which is
+    parsable to timestamp.
+
+    Args:
+        path (str): Path where you want to do the listing.
+        listdir (fn reference): Function, which takes `path` argument and
+            returns list of filenames.
+
+    Returns:
+        list: :class:`FileObj` instances.
+    """
     def parse_ts(fn):
+        """
+        Parse timestamp from `fn` (filename). Timestamp is expected to be in
+        `%%Y.%%m.%%d_` format.
+
+        Args:
+            fn (str): Filename.
+
+        Returns:
+            int: Timestamp.
+        """
         date_string = fn.split("_")[0]
 
         try:
@@ -68,6 +92,17 @@ def pick_n(dataset, n):
 
 
 def collect_old_files(file_list, today=None):
+    """
+    Get list of old files, which are designated for removal.
+
+    Args:
+        file_list (list): List of :class:`FileObj` from :func:`collect_files`.
+        today (int, default None): Timestamp which will be used to compute
+            diffs. If not set, `time.time()` is used.
+
+    Returns:
+        list: List :class:`FileObj` designated for removal.
+    """
     if not today:
         today = time.time()
 
@@ -120,6 +155,16 @@ def collect_old_files(file_list, today=None):
 
 
 def exists(client, path):
+    """
+    Check whether the `path` exists in ownCloud account.
+
+    Args:
+        client (obj): Instance of the logged in ownCloud handler.
+        path (str): Path to the file / directory.
+
+    Returns:
+        bool: True, if the file exists.
+    """
     path = os.path.abspath(path)
 
     dirname = os.path.dirname(path)
@@ -134,6 +179,17 @@ def exists(client, path):
 
 
 def upload_file(remote_path, path, add_date_string=True):
+    """
+    Upload file at `path` to `remote_path`.
+
+    Args:
+        remote_path (str): Path on the ownCloud account.
+        path (str): Local path.
+        add_date_string (bool, default True): Added prefix with current date?
+
+    Returns:
+        bool: True if successfull.
+    """
     if add_date_string:
         filename = os.path.basename(os.path.abspath(path))
         remote_path = os.path.join(
@@ -145,6 +201,15 @@ def upload_file(remote_path, path, add_date_string=True):
 
 
 def get_config(args):
+    """
+    Merge local configuration files with arguments addedd from commandline.
+
+    Args:
+        args (obj): Argparse argument object.
+
+    Returns:
+        obj: :class:`ConfigParser.SafeConfigParser` instance.
+    """
     config = ConfigParser.SafeConfigParser()
     config.read([
         "owncloud_backup.cfg",
@@ -154,10 +219,10 @@ def get_config(args):
     # set configuration options
     if not config.has_section("Config"):
         config.add_section("Config")
-    if not config.has_option("Config", "suffix"):
-        config.set("Config", "suffix", ".gz")
     if not config.has_option("Config", "remote_path"):
         config.set("Config", "remote_path", "backups")
+    if not config.has_option("Config", "no_timestamp"):
+        config.set("Config", "no_timestamp", args.no_ts)
 
     # set login options
     if not config.has_section("Login"):
@@ -174,7 +239,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description="""This program may be used to perform database backups
-            into ownCloud."""
+            into ownCloud.
+
+            Configuration file in ini format is expected in
+            `owncloud_backup.cfg` or `~/.owncloud_backup.cfg` paths.
+        """
     )
     parser.add_argument(
         "-u",
@@ -243,7 +312,6 @@ if __name__ == "__main__":
 
     all_files = collect_files(
         remote_path,
-        suffix=config.get("Config", "suffix"),
         listdir=lambda path: [
             os.path.basename(os.path.abspath(x.path))
             for x in client.list(path)
