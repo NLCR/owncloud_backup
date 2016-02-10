@@ -190,7 +190,7 @@ if __name__ == "__main__":
     config = get_config(args)
 
     client = owncloud.Client(config.get("Login", "url"))
-    client.login(config.get("Login", "pass"), config.get("Login", "user"))
+    client.login(config.get("Login", "user"), config.get("Login", "pass"))
 
     # check whether the user was really logged in
     try:
