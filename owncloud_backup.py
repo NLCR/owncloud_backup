@@ -7,6 +7,7 @@
 import os
 import sys
 import time
+import argparse
 import datetime
 import ConfigParser
 from collections import namedtuple
@@ -19,14 +20,14 @@ import owncloud
 FileObj = namedtuple("FileObj", "timestamp filename")
 
 
-def collect_files(path):
+def collect_files(path, suffix):
     def file_list(path):
         for fn in os.listdir(path):
-            if path.endiswith(".gz"):
+            if path.endiswith(suffix):
                 yield fn
 
     def parse_ts(fn):
-        date_string = fn.split("_")[-1].split(".gz")[0]
+        date_string = fn.split("_")[-1].split(suffix)[0]
         date = datetime.datetime.strptime(date_string, "%Y.%m.%d").timetuple()
 
         return time.mktime(date)
@@ -132,27 +133,64 @@ def exists(client, path):
     }
 
 
-# Main program ================================================================
-if __name__ == '__main__':
+def get_config(args):
     config = ConfigParser.SafeConfigParser()
     config.read([
-        'owncloud_backup.cfg',
-        os.path.expanduser('~/.owncloud_backup.cfg'),
+        "owncloud_backup.cfg",
+        os.path.expanduser("~/.owncloud_backup.cfg"),
     ])
+
+    # set configuration options
     if not config.has_section("Config"):
         config.add_section("Config")
     if not config.has_option("Config", "suffix"):
-        config.set('Config', 'suffix', '.gz')
+        config.set("Config", "suffix", ".gz")
     if not config.has_option("Config", "remote_path"):
-        config.set('Config', 'remote_path', 'backups')
+        config.set("Config", "remote_path", "backups")
 
-    pwd = config.get("Login", "pass")
-    user = config.get("Login", "user")
-    suffix = config.get("Config", "suffix")
-    remote_path = config.get("Config", "remote_path")
+    # set login options
+    if not config.has_section("Login"):
+        config.add_section("Login")
+    if not config.has_option("Login", "url"):
+        config.set("Login", "url", args.url)
 
-    client = owncloud.Client("https://owncloud.cesnet.cz")
-    client.login(user, pwd)
+    return config
+
+
+# Main program ================================================================
+if __name__ == "__main__":
+    default_url = "https://owncloud.cesnet.cz"
+
+    parser = argparse.ArgumentParser(
+        description="""This program may be used to perform database backups
+        into ownCloud."""
+    )
+    parser.add_argument(
+        "-u",
+        "--username",
+        help="Username of the ownCloud user."
+    )
+    parser.add_argument(
+        "-p",
+        "--password",
+        help="Password of the ownCloud user."
+    )
+    parser.add_argument(
+        "--url",
+        default=default_url,
+        help="URL of the ownCloud service. Default %s."
+    )
+    parser.add_argument(
+        "FILENAME",
+        nargs=1,
+        help="Upload FILENAME into the ownCloud."
+    )
+
+    args = parser.parse_args()
+    config = get_config(args)
+
+    client = owncloud.Client(config.get("Login", "url"))
+    client.login(config.get("Login", "pass"), config.get("Login", "user"))
 
     # check whether the user was really logged in
     try:
@@ -166,6 +204,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # try to create `remote_path` directory
+    remote_path = config.get("Config", "remote_path")
     if not exists(client, remote_path):
         if not client.mkdir(remote_path):
             print >>sys.stderr, (
@@ -174,9 +213,16 @@ if __name__ == '__main__':
             )
             sys.exit(1)
 
-    # make_backup()
-    # all_files = collect_files(remote_path)
-    # old_files = collect_old_files(all_files)
+    if not os.path.exists(args.FILENAME):
+        print >>sys.stderr, "`%s` doesn't exists!" % args.FILENAME
+        sys.exit(1)
 
-    # for file in old_files:
-    #     pass  #: Todo: unlink
+    if not client.put_file(remote_path, args.FILENAME):
+        print >>sys.stderr, "Couln't upload `%s`, sorry." % args.FILENAME
+        sys.exit(1)
+
+    all_files = collect_files(remote_path, config.get("Config", "suffix"))
+    old_files = collect_old_files(all_files)
+
+    for file in old_files:
+        client.delete(file.path)
