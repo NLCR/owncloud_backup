@@ -68,10 +68,10 @@ All variables defined in configuration file may be also added using commandline 
 Installation
 ------------
 
-Module is hosted at `PYPI <https://pypi.python.org/pypi/resolver_backuper>`_, and
+Module is hosted at `PYPI <https://pypi.python.org/pypi/owncloud_backup>`_, and
 can be installed using `PIP`_::
 
-    sudo pip install resolver_backuper
+    sudo pip install owncloud_backup
 
 .. _PIP: http://en.wikipedia.org/wiki/Pip_%28package_manager%29
 

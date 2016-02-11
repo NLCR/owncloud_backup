@@ -57,6 +57,9 @@ setup(
     license='MIT',
 
     py_modules=["owncloud_backup"],
+    scripts=[
+        "owncloud_backup.py"
+    ],
 
     include_package_data=True,
     zip_safe=True,
