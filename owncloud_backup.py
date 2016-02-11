@@ -172,10 +172,12 @@ def exists(client, path):
 
     listing = client.list(dirname)
 
-    return filename in {
+    # I intentionally don't use set comprehension because of
+    # support of prehistorical python2.6 suse servers
+    return filename in set([
         os.path.basename(os.path.abspath(x.path))
         for x in listing
-    }
+    ])
 
 
 def upload_file(remote_path, path, add_date_string=True):
