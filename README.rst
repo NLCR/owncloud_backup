@@ -41,7 +41,8 @@ Commandline arguments
 
 All variables defined in configuration file may be also added using commandline arguments::
 
-    usage: owncloud_backup.py [-h] [-u USERNAME] [-p PASSWORD] [--url URL] [-n]
+    usage: owncloud_backup.py [-h] [-u USERNAME] [-p PASSWORD] [--url URL]
+                              [-r REMOTE_PATH] [-n]
                               FILENAME
 
     This program may be used to perform database backups into ownCloud.
@@ -59,6 +60,8 @@ All variables defined in configuration file may be also added using commandline 
                             Password of the ownCloud user.
       --url URL             URL of the ownCloud service. Default
                             `https://owncloud.cesnet.cz`.
+      -r REMOTE_PATH, --remote-path REMOTE_PATH
+                            Path on the server. Default `/backups`.
       -n, --no-timestamp    By default, the script adds `%Y.%m.%d_` prefix to each
                             uploaded file.
 

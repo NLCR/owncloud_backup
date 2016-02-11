@@ -220,7 +220,7 @@ def get_config(args):
     if not config.has_section("Config"):
         config.add_section("Config")
     if not config.has_option("Config", "remote_path"):
-        config.set("Config", "remote_path", "backups")
+        config.set("Config", "remote_path", args.remote_path)
     if not config.has_option("Config", "no_timestamp"):
         config.set("Config", "no_timestamp", args.no_ts)
 
@@ -259,6 +259,12 @@ if __name__ == "__main__":
         "--url",
         default=default_url,
         help="URL of the ownCloud service. Default `%s`." % default_url
+    )
+    parser.add_argument(
+        "-r",
+        "--remote-path",
+        default="backups",
+        help="Path on the server. Default `/backups`."
     )
     parser.add_argument(
         "-n",
