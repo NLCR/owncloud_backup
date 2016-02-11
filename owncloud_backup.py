@@ -224,7 +224,11 @@ def get_config(args):
     if not config.has_option("Config", "remote_path"):
         config.set("Config", "remote_path", args.remote_path)
     if not config.has_option("Config", "no_timestamp"):
-        config.set("Config", "no_timestamp", args.no_ts)
+        config.set(
+            "Config",
+            "no_timestamp",
+            str(args.no_ts).lower(),
+        )
 
     # set login options
     if not config.has_section("Login"):
@@ -314,7 +318,8 @@ if __name__ == "__main__":
         print >>sys.stderr, "`%s` doesn't exists!" % filename
         sys.exit(1)
 
-    if not upload_file(remote_path, filename, not args.no_ts):
+    no_ts = config.getboolean("Config", "no_timestamp")
+    if not upload_file(remote_path, filename, not no_ts):
         print >>sys.stderr, "Couln't upload `%s`, sorry." % filename
         sys.exit(1)
 
