@@ -235,6 +235,10 @@ def get_config(args):
         config.add_section("Login")
     if not config.has_option("Login", "url"):
         config.set("Login", "url", args.url)
+    if args.username:
+        config.set("Login", "user", args.username)
+    if args.password:
+        config.set("Login", "pass", args.password)
 
     return config
 

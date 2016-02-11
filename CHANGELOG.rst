@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.1.4
+-----
+    - Fixed bugs in argument parsing priority.
+
 0.1.3
 -----
     - Added few other python2.6 updates.
