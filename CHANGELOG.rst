@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.1.5
+-----
+    - Added mute of the InsecurePlatformWarning.
+
 0.1.4
 -----
     - Fixed bugs in argument parsing priority.

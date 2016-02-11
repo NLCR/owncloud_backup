@@ -14,6 +14,11 @@ from collections import namedtuple
 
 import owncloud
 
+# to disable SSL complaints
+import requests
+if hasattr(requests, "packages"):
+    requests.packages.urllib3.disable_warnings()
+
 
 # Functions & classes =========================================================
 FileObj = namedtuple("FileObj", "timestamp filename")
