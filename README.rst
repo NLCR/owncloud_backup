@@ -75,6 +75,19 @@ can be installed using `PIP`_::
 
 .. _PIP: http://en.wikipedia.org/wiki/Pip_%28package_manager%29
 
+Installation on SuSe
+--------------------
+
+In case that you are using ancient Suse installation with old python versions and no PIP, you may install it with following commands::
+
+  wget --no-check-certificate https://pypi.python.org/packages/source/s/setuptools/setuptools-20.0.zip
+  unzip setuptools-20.0.zip
+  cd setuptools-20.0/
+  python setup.py install
+  easy_install pip==1.2
+  pip install -U owncloud_backup
+
+
 Source code
 +++++++++++
 
