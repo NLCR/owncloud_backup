@@ -61,7 +61,7 @@ def collect_files(path, listdir):
         return time.mktime(date)
 
     return [
-        FileObj(timestamp=parse_ts(fn), filename=fn)
+        FileObj(timestamp=parse_ts(fn), filename=os.path.join(path, fn))
         for fn in listdir(path)
         if "_" in fn and parse_ts(fn) is not None
     ]
@@ -342,4 +342,4 @@ if __name__ == "__main__":
     old_files = collect_old_files(all_files)
 
     for file in old_files:
-        client.delete(file.path)
+        client.delete(file.filename)

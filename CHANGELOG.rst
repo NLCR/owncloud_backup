@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.1.6
+-----
+    - Fixed bug in removing old files on remote server.
+
 0.1.5
 -----
     - Added mute of the InsecurePlatformWarning.
